@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import css from "./App.module.css";
 
 import { fetchImagesApi } from "../services/images-api";
@@ -10,95 +10,91 @@ import {Button} from "./Button/Button";
 import {Modal} from "./Modal/Modal";
 import {Loader} from "./Loader/Loader";
 
-export class App extends Component {
-  state = {
-    images: [],
-    searchQuery: "",
-    largeImageURL: "",
-    filter: "",
-    isLoading: false,
-    error: null,
-    showModal: false,
-    currentPage: 1,
-    showLoadMore: false,
-    imagesOnPage: 0,
-    totalImages: 0,
-  };
+export function App() {
+  const [images, setImages] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [largeImageURL, setLargeImageURL] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  //const [showLoadMore, setShowLoadMore] = useState(false);
+  //const [totalImages, setTotalImages] = useState(0);
 
-  componentDidUpdate(_, prevState) {
-    if (prevState.searchQuery !== this.state.searchQuery ||
-      prevState.currentPage !== this.state.currentPage) {
-      this.fetchImages();
-    }
-  }
-
-  componentDidCatch(error) {
-    this.setState({ error });
-  }
-
-  onChangeQuery = (query) => {
-    this.setState({ searchQuery: query, currentPage: 1, images: [] });
-  };
-
-  fetchImages = () => {
-    const { currentPage, searchQuery, showLoadMore, totalImages } = this.state;
-    this.setState({ isLoading: true });
-
-    fetchImagesApi(currentPage, searchQuery, showLoadMore, totalImages)
-      .then((data) => {
-        this.setState(prevState => ({
-          images: [...prevState.images, ...data],
-          showLoadMore: currentPage < Math.ceil([...prevState.images, ...data].length/15),
-          error: "",
-        }))
+  useEffect(() => {
+    if (!searchQuery) return;
+    const fetchImages = () => {
+      fetchImagesApi(currentPage, searchQuery)
+        .then((data) => {  
+          setImages((prevImages) => {        
+            return [...prevImages, ...data];
+          }); 
+          
+        if (data.length === 0) {
+          return setError(`No results were found for ${searchQuery}!`);
+      } 
       })
       .catch((error) => {
-        console.log(error);
+        setError('Something went wrong. Try again.');
       })
       .finally(() => {
-        this.setState({ isLoading: false });
+        setIsLoading(false);
       });
+    };
+
+    fetchImages();
+  }, [currentPage, searchQuery]);
+/*
+  const onShowLoadMore = (totalImages) => {
+    if (currentPage < Math.ceil(totalImages / 15)) {
+      setShowLoadMore(true);
+    }
+  }; */
+
+  const onChangeQuery = query => {
+    setIsLoading(true);
+    setSearchQuery(query);
+    setImages([]);
+    setCurrentPage(1);
   };
 
-  toggleModal = () =>
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
+  const toggleModal = () => {
+    setShowModal(!showModal);
+  }
 
-  handleLargeURLImage = (data) => {
-    this.setState({ largeImageURL: data });
-    this.setState({ showModal: true });
+  const handleLargeURLImage = (data) => {
+    setLargeImageURL(data);
+    setShowModal(true);
   };
-
-  onNextFetch = () => {
-    this.setState(({ currentPage }) => ({ currentPage: currentPage + 1 }));
+  
+  const onNextFetch = () => {
+    setCurrentPage(currentPage + 1);
   };
-
-  render() {
-    const { images, showModal, largeImageURL, isLoading, showLoadMore } = this.state;
-    return (
+  
+  return (
       <div className={css.App}>
         <Container>
           {showModal && (
-            <Modal onClose={this.toggleModal} largeImageURL={largeImageURL} />
+            <Modal onClose={toggleModal} largeImageURL={largeImageURL} />
           )}
           <Searchbar
-            onSubmit={this.onChangeQuery}
-            searchQuery={this.searchQuery}
+            onSubmit={onChangeQuery}
+            searchQuery={searchQuery}
           />
           {images.length > 0 && (
             <ImageGallery
               images={images}
-              handleLargeURLImage={this.handleLargeURLImage}
+              handleLargeURLImage={handleLargeURLImage}
             />
           )}
           {isLoading ? (
             <Loader />
-          ) : (
-              showLoadMore && (<Button onClick={this.onNextFetch} />) 
+        ) : (
+            (currentPage < Math.ceil(images.length / 15)) &&
+              //showLoadMore &&
+              (<Button onClick={onNextFetch} />) 
           )}
         </Container>
       </div>
     );
-  }
 }

@@ -7,7 +7,7 @@ const params = {
   API: '30147875-1b32fddb16ed51bfbd356d818',
 };
 
-export const fetchImagesApi = ( currentPage, searchQuery ) => {
+export const fetchImagesApi = (currentPage, searchQuery) => {
   return fetch(
     `${params.baseURL}?key=${params.API}&q=${searchQuery}&${params.paramsImage}&page=${currentPage}`
     )

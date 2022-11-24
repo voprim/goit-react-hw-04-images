@@ -1,18 +1,13 @@
-import React, { PureComponent } from "react";
+import React, { useState } from "react";
 import PropTypes from 'prop-types';
 import {ThreeDots} from "react-loader-spinner";
 
-export class Loader extends PureComponent {
-  constructor(props) {
-    super(props);
+export function Loader() {
 
-    this.state = {
-      hasError: false,
-    };
-  }
+  const [hasError, setHasError] = useState(false);
 
-  render() {
-    if (this.state.hasError) {
+
+  if (hasError) {
       return <h1>Something went wrong.</h1>;
     }
     return (
@@ -20,7 +15,6 @@ export class Loader extends PureComponent {
         <ThreeDots type="ThreeDots" color="#00BFFF" height={80} width={80} />
       </div>
     );
-  }
 }
 
 Loader.propTypes = {

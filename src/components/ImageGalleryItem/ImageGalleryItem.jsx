@@ -1,33 +1,31 @@
-import React, { PureComponent } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import css from "./ImageGalleryItem.module.css";
 
-export class ImageGalleryItem extends PureComponent {
-  handleClick = (e) => {
+export function ImageGalleryItem({ webformatURL, largeImageURL, tags, handleLargeURLImage }) {
+  
+  const handleClick = (e) => {
     if (e.target.nodeName === "IMG") {
-      this.setState({ largeImageURL: e.target.dataset.large });
-      this.props.handleLargeURLImage(e.target.dataset.large);
+      largeImageURL = e.target.dataset.large;
+      handleLargeURLImage(e.target.dataset.large);
     }
   };
-  render() {
-    const { webformatURL, largeImageURL, tags } = this.props;
-
-    return (
+  
+  return (
       <li
         className={css.ImageGalleryItem}
         key={webformatURL}
-        onClick={this.handleClick}
+        onClick={handleClick}
       >
         <img
           src={webformatURL}
           alt={tags}
           className={css.ImageGalleryItemImage}
-          onClick={this.handleClick}
+          onClick={handleClick}
           data-large={largeImageURL}
         />
       </li>
     );
-  }
 }
 
 ImageGalleryItem.propTypes = {

@@ -1,33 +1,29 @@
-import React, { PureComponent } from "react";
+import React, { useState } from "react";
 import PropTypes from 'prop-types';
 import css from "./Searchbar.module.css";
 
-export class Searchbar extends PureComponent {
-  state = { query: "" };
+export function Searchbar({ onSubmit, searchQuery }) {
+  const [query, setQuery] = useState("");
 
-  handleChange = (e) => {
-    this.setState({ query: e.currentTarget.value });
+  const handleChange = (e) => {
+    setQuery(e.currentTarget.value);
   };
 
-  handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    this.props.onSubmit(this.state.query);
-
-    this.setState({ query: "" });
+    onSubmit(query);
+    setQuery("");
   };
-  render() {
-    const { query } = this.state;
 
-    return (
+  return (
       <header className={css.Searchbar}>
-        <form className={css.SearchForm} onSubmit={this.handleSubmit}>
+        <form className={css.SearchForm} onSubmit={handleSubmit}>
           <button type="submit" className={css.SearchFormButton}>
             <span className={css.SearchFormButtonLabel}>Search</span>
           </button>
 
           <input
-            onChange={this.handleChange}
+            onChange={handleChange}
             className={css.SearchFormInput}
             value={query}
             type="text"
@@ -37,7 +33,6 @@ export class Searchbar extends PureComponent {
         </form>
       </header>
     );
-  }
 }
 
 Searchbar.propTypes = {
