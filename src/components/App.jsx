@@ -18,22 +18,27 @@ export function App() {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  //const [showLoadMore, setShowLoadMore] = useState(false);
+  const [showLoadMore, setShowLoadMore] = useState(false);
   //const [totalImages, setTotalImages] = useState(0);
 
   useEffect(() => {
     if (!searchQuery) return;
+    //let res = 0;
     const fetchImages = () => {
       fetchImagesApi(currentPage, searchQuery)
         .then((data) => {  
-          setImages((prevImages) => {        
+          setImages((prevImages) => { 
+            const res = [...prevImages, ...data].length;
+            if (currentPage < Math.ceil(res / 15)) {
+              setShowLoadMore(true);
+            } else { setShowLoadMore(false);}
             return [...prevImages, ...data];
           }); 
           
-        if (data.length === 0) {
-          return setError(`No results were found for ${searchQuery}!`);
-      } 
-      })
+          if (data.length === 0) {
+            return setError(`No results were found for ${searchQuery}!`);
+          } 
+        })
       .catch((error) => {
         setError('Something went wrong. Try again.');
       })
@@ -44,12 +49,6 @@ export function App() {
 
     fetchImages();
   }, [currentPage, searchQuery]);
-/*
-  const onShowLoadMore = (totalImages) => {
-    if (currentPage < Math.ceil(totalImages / 15)) {
-      setShowLoadMore(true);
-    }
-  }; */
 
   const onChangeQuery = query => {
     setIsLoading(true);
@@ -59,7 +58,7 @@ export function App() {
   };
 
   const toggleModal = () => {
-    setShowModal(!showModal);
+    setShowModal(!showModal)
   }
 
   const handleLargeURLImage = (data) => {
@@ -90,9 +89,7 @@ export function App() {
           {isLoading ? (
             <Loader />
         ) : (
-            (currentPage < Math.ceil(images.length / 15)) &&
-              //showLoadMore &&
-              (<Button onClick={onNextFetch} />) 
+              showLoadMore && (<Button onClick={onNextFetch} />) 
           )}
         </Container>
       </div>
